@@ -37,7 +37,7 @@ def give_link(link):
 
             return (return_link_list)
     except:
-        return ["No access"]
+        return [None]
 
 def crawler(url, depth=2, mem=set()):
     links_yaml = open("links.yaml","w")
