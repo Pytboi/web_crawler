@@ -2,26 +2,42 @@ import urllib.request
 import yaml
 import argparse
 def give_link(link):
-    link_list = []
+    return_link_list = []
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
-    #chat gpt told me to do so, it defineds the web agent. some webs don't like pythons defult agent
-    try:#if access denied or 404
+    #chat gpt told me to do so, it defineds the agent. some webs don't like pythons defult agent
+    try: #if access denied or 404
             req = urllib.request.Request(link, headers=headers)
             response = urllib.request.urlopen(req)
-            html_str = response.read().decode('utf-8')
+            text_str = response.read().decode('utf-8')
 
-            for i in range(len(html_str) - 6):
-                if html_str[i:i + 6] == 'href="':
+#create the home link. maybe the link on the page doesnt start with "http...", so we can to add it for the link
+            if link[-1] != "/":
+                link += "/"
+            home_link = "https://"
+            for i in link[8:]: #whith out the "https://
+                if i != "/": #the end of the home page
+                    home_link += i
+                else:
+                    break
+
+            for i in range(len(text_str) - 6):
+                if text_str[i:i + 6] == 'href="':
                     j = i + 6
-                    curr_link = ""
-                    if html_str[j:j+4] == 'http':
-                        while html_str[j] != '"':
-                            curr_link += html_str[j]
-                            j+=1
-                        link_list.append(curr_link)
-            return (link_list)
+                    now_link = ""
+
+#get the link
+                    while text_str[j] != '"':
+                        now_link += text_str[j]
+                        j += 1
+#check if its a legal link
+                    if now_link[0:4] == 'http':
+                        return_link_list.append(now_link)
+                    elif now_link[0] == "/": #check if its even link or not
+                        return_link_list.append(home_link + now_link)
+
+            return (return_link_list)
     except:
-        return []
+        return ["No access"]
 
 def crawler(url, depth=2, mem=set()):
     links_yaml = open("links.yaml","w")
